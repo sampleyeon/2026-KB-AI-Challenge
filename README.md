@@ -222,6 +222,11 @@ existing_df = excel["기존 사업자"]
 사업 단계를 기준으로 데이터를 분리한다.
 추천 과정에서 사업단계별로 다른 Prompt를 적용하기 위해 사용된다.
 ```
+ </details>
+
+
+<details>
+  <summary><b>STEP2</b></summary>
 
 
 
