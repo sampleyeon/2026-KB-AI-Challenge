@@ -228,6 +228,82 @@ existing_df = excel["기존 사업자"]
 <details>
   <summary><b>STEP2</b></summary>
 
+  ## 금융상품 API 수집
+
+## 목적
+
+은행 금융상품 정보를 자동으로 수집하여 추천 데이터베이스를 구축한다.
+
+---
+
+## 사용 기술
+
+- 금융감독원 FinLife Open API
+- Requests
+
+---
+
+## 구현 이유
+
+은행 홈페이지를 직접 크롤링하지 않고
+
+공식 Open API를 이용하여
+
+신뢰성 있는 금융상품 데이터를 수집하기 위해 구현하였다.
+
+### 구현 내용
+
+금융감독원
+
+FinLife Open API
+
+활용
+
+수집 정보
+
+- 은행명
+- 상품명
+- 평균금리
+- 최대금리
+- 최소금리
+- 가입방법
+- 대출한도
+
+---
+
+### 주요 코드
+
+```python
+response = requests.get(url, params=params)
+FinLife API에 요청을 보내 금융상품 정보를 받아온다.
+```
+
+```python
+data = response.json()
+JSON 데이터를 Python Dictionary 형태로 변환한다.
+```
+
+```python
+base_df = pd.DataFrame(data["result"]["baseList"])
+상품 기본정보를 DataFrame으로 변환한다.
+```
+
+```python
+option_df = pd.DataFrame(data["result"]["optionList"])
+금리정보를 DataFrame으로 변환한다.
+```
+
+```python
+financial_products = pd.merge(
+    base_df,
+    option_df,
+    on="fin_prdt_cd"
+)
+
+상품정보와 금리정보를 하나의 금융상품 데이터로 통합한다.
+```
+ </details>
+
 
 
   
