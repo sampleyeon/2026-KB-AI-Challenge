@@ -305,8 +305,67 @@ financial_products = pd.merge(
  </details>
 
 
+<details>
+  <summary><b>STEP3</b></summary>
 
-  
+  ## 정책 데이터 수집
+
+### 목적
+
+정부 정책을 AI가 검색할 수 있도록 정책 데이터베이스를 구축한다.
+
+### 사용 기술
+
+- 기업마당 Open API
+- Requests
+
+---
+
+### 구현 이유
+
+정책은 여러 기관에 분산되어 있으므로
+
+검색 가능한 하나의 데이터셋으로 구축하기 위해 구현하였다.
+
+### 구현 내용
+
+기업마당 Open API
+
+활용
+
+수집 정보
+
+- 정책명
+- 지원대상
+- 지원내용
+- 신청기간
+- 신청방법
+- 기관
+- URL
+
+---
+
+### 주요 코드
+
+```python
+response = requests.get(url, params=params)
+기업마당 API를 호출한다.
+```
+
+```python
+items = data["jsonArray"]
+정책 목록만 추출한다.
+```
+
+```python
+all_data.extend(items)
+페이지별 정책 데이터를 하나의 리스트로 누적 저장한다.
+```
+
+```python
+policy_df = pd.DataFrame(all_data)
+정책 데이터를 DataFrame으로 변환한다.
+```
 
 
 
