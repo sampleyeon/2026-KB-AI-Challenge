@@ -366,8 +366,302 @@ all_data.extend(items)
 policy_df = pd.DataFrame(all_data)
 정책 데이터를 DataFrame으로 변환한다.
 ```
+ </details>
 
+<details>
+  <summary><b>STEP4</b></summary>
 
+  ## 정책 데이터 전처리
+
+### 목적
+
+정책 검색 성능을 높이기 위해 문서를 정제한다.
+
+### 사용 기술
+
+- BeautifulSoup
+- Pandas
+
+### 구현 이유
+
+기업마당 API에는 HTML 태그가 포함되어 있어 Embedding 품질이 떨어질 수 있다. 이를 제거하여 검색 정확도를 향상시켰다.
+
+### 주요 코드
+
+```python
+BeautifulSoup(
+    text,
+    "html.parser"
+).get_text()
+HTML 태그 제거
+```
+
+```python
+fillna("")
+결측치를 빈 문자열로 변경
+Embedding 생성 시 오류를 방지한다.
+```
+
+```python
+policy_df["document"] = ...
+여러 컬럼을 하나의 긴 문서(Document)로 결합한다
+```
+
+### 구현 이유
+
+Vector Search는
+
+하나의 긴 문장을 입력받을 때 검색 성능이 가장 높기 때문이다.
+
+ </details>
+
+ <details>
+  <summary><b>STEP5</b></summary>
+
+  ## Embedding 생성
+
+## 목적
+
+텍스트를 숫자 벡터로 변환한다.
+
+## 사용 기술
+
+SentenceTransformer
+
+```python
+paraphrase-multilingual-MiniLM-L12-v2
+```
+
+### 구현 이유
+
+LLM은 의미 기반 검색을 수행하므로 텍스트를 의미 벡터로 변환해야 한다.
+
+### 주요 코드
+
+```python
+embedding = HuggingFaceEmbeddings(...)
+문장을 384차원 벡터로 변환하는 모델을 생성한다.
+```
+
+ </details>
+
+<details>
+  <summary><b>STEP6</b></summary>
+
+  ## Vector DB 구축
+
+## 목적
+
+정책 검색 속도를 높인다.
+
+## 사용 기술
+
+FAISS
+
+## 구현 이유
+
+수백 개 정책을 매번 LLM으로 비교하면 매우 느리다.
+
+FAISS를 이용하면 가장 유사한 정책만 빠르게 검색할 수 있다.
+
+## 주요 코드
+
+```python
+FAISS.from_documents(
+    documents,
+    embedding
+)
+정책 문서를 Vector DB로 저장한다.
+```
+
+```python
+vector_db.save_local(...)
+생성한 Vector DB를 저장하여 재사용한다.
+```
+
+ </details>
+
+<details>
+  <summary><b>STEP7</b></summary>
+
+  ## 사용자 프로필 생성
+
+## 목적
+
+사용자의 정보를 자연어 형태로 변환한다.
+
+## 사용 기술
+
+Python 함수
+
+## 구현 이유
+
+LLM은 DataFrame보다
+
+문장 형태를 더 잘 이해한다.
+
+## 주요 코드
+
+```python
+make_profile(user)
+사용자 정보를 하나의 문장으로 생성한다.
+```
+
+ </details>
+
+<details>
+  <summary><b>STEP8</b></summary> 
+
+  ## 검색 키워드 생성
+
+## 목적
+
+AI가 검색 전략을 직접 생성한다.
+
+## 사용 기술
+
+Claude Sonnet 4.6
+
+## 구현 이유
+
+사용자가 직접 검색어를 입력하지 않아도
+
+AI가 가장 적합한 검색어를 생성하도록 구현하였다.
+
+## 주요 코드
+
+```python
+search_prompt
+검색어 생성 Prompt
+```
+
+```python
+client.chat.completions.create()
+LLM이 검색 키워드를 생성한다.
+```
+
+ </details>
+
+<details>
+  <summary><b>STEP9</b></summary>
+
+  ## 정책 검색(RAG)
+
+## 목적
+
+사용자에게 적합한 정책만 검색한다.
+
+## 사용 기술
+
+FAISS Retriever
+
+## 구현 이유
+
+전체 정책을 LLM에 전달하면 토큰이 낭비된다. 따라서 유사도가 높은 정책만 검색한다.
+
+## 주요 코드
+
+```python
+retriever.invoke(query)
+가장 유사한 정책 Top5 검색
+```
+
+```python
+all_docs.extend(docs)
+여러 검색어의 결과를 합친다.
+```
+
+```python
+seen = set()
+중복 정책 제거
+```
+ </details>
+
+ <details>
+  <summary><b>STEP10</b></summary>
+
+# STEP 10
+
+## 금융 상품 추천
+
+## 목적
+
+사용자에게 적합한 금융상품을 추천한다.
+
+## 사용 기술
+
+Pandas
+
+## 구현 이유
+
+은행별 동일 상품이 여러 개 존재하므로
+
+대표 상품만 추천하도록 구현하였다.
+
+또한 KB국민은행 공모전 특성을 반영하여
+
+KB 상품을 우선 추천하도록 설계하였다.
+
+## 주요 코드
+
+```python
+loan_recommend["kb_priority"]
+국민은행 상품 여부를 판단한다.
+```
+
+```python
+sort_values()
+국민은행 우선 -> 금리순 정렬
+```
+
+```python
+drop_duplicates()
+은행별 대표상품 1개만 선택
+```
+
+```python
+loan_context
+금융상품 정보를 Prompt에 전달하기 위한 문자열 생성
+```
+
+---
+
+## 최종 AI 추천
+
+## 목적
+
+정책과 금융상품을 함께 추천하는 AI 컨설팅을 수행한다.
+
+## 사용 기술
+
+Claude Sonnet 4.6 (LLM)
+
+## 구현 이유
+
+정책만 추천하는 것이 아니라
+
+정책과 금융상품을 함께 활용하는 전략을 제안하기 위해 구현하였다.
+
+## 주요 코드
+
+```python
+final_prompt
+최종 AI 컨설팅 Prompt
+```
+
+```python
+response = client.chat.completions.create(...)
+
+LLM이
+-사용자 분석
+-정책 추천
+-금융상품 추천
+-신청 순서
+-활용 전략
+을 종합적으로 생성한다.
+```
+ </details>
+  
 
   
 
