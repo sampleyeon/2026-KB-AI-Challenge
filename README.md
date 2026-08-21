@@ -207,6 +207,24 @@ AI는 사용자 정보를 기반으로 추천을 수행하기 때문에
 
 ### 주요 코드
 
+```python
+excel = pd.read_excel(
+    "business_owner.xlsx",
+    sheet_name=None
+)
+Excel의 모든 시트를 한 번에 불러온다.
+```
+
+```python
+startup_df = excel["예비 사업자"]
+existing_df = excel["기존 사업자"]
+
+사업 단계를 기준으로 데이터를 분리한다.
+추천 과정에서 사업단계별로 다른 Prompt를 적용하기 위해 사용된다.
+```
+
+
+
   
 
 
