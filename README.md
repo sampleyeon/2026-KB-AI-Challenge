@@ -135,9 +135,9 @@ AI 통합 추천
 
  </details>
 
-## 코드
+## 코드구현 정리
 <details>
-  <summary><b>코드 구현 설명정리</b></summary>
+  <summary><b>STEP1</b></summary>
 
 
   
